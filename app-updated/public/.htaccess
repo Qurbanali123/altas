@@ -1,0 +1,73 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Next.js static export: map flat RSC payload paths to nested export folders.
+  # More-specific __PAGE__ rules first, then segment payloads (required for soft nav).
+  RewriteRule ^(.+)/__next\.([^.]+)\.([^.]+)\.__PAGE__\.txt$ $1/__next.$2/$3/__PAGE__.txt [L]
+  RewriteRule ^(.+)/__next\.([^.]+)\.__PAGE__\.txt$ $1/__next.$2/__PAGE__.txt [L]
+  RewriteRule ^(.+)/__next\.([^.]+)\.([^.]+)\.txt$ $1/__next.$2/$3.txt [L]
+  RewriteRule ^(.+)/__next\.([^.]+)\.txt$ $1/__next.$2.txt [L]
+
+  # Serve existing files and directories as-is.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Blog detail pages not pre-rendered at build time.
+  RewriteRule ^pages/Blogs/[^/]+/?$ /pages/Blogs/_fallback/index.html [L]
+
+  # Speciality detail pages not pre-rendered at build time.
+  RewriteRule ^pages/specialites/[^/]+/?$ /pages/specialites/_fallback/index.html [L]
+</IfModule>
+
+# ── Compression (smaller transfers) ──────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+  AddOutputFilterByType DEFLATE text/javascript application/javascript application/x-javascript
+  AddOutputFilterByType DEFLATE application/json application/xml application/rss+xml
+  AddOutputFilterByType DEFLATE image/svg+xml font/woff font/woff2 application/font-woff application/font-woff2
+</IfModule>
+
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css
+  AddOutputFilterByType BROTLI_COMPRESS text/javascript application/javascript application/x-javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/json application/xml image/svg+xml
+  AddOutputFilterByType BROTLI_COMPRESS font/woff font/woff2 application/font-woff application/font-woff2
+</IfModule>
+
+# ── Browser caching (repeat visits load faster) ──────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 hour"
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/json "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "DENY"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+  <FilesMatch "\.(js|css|woff2?|jpg|jpeg|png|webp|gif|svg|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  <FilesMatch "\.(webp)$">
+    Header set Content-Type "image/webp"
+  </FilesMatch>
+</IfModule>

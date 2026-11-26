@@ -1,0 +1,12 @@
+UPLOAD BOTH for permanent doctor black-bg fix:
+
+1) Frontend: `app/out/` → public_html
+   - Transparent udrimage.png + aboutDoc.png
+   - BlackKeyImage strips black from CMS uploads before display
+
+2) Backend: `dist/` → Node app → Restart
+   - Health version: cms-transparent-doctor-2026-07-26a
+   - CORS on /uploads so cutout processing works
+
+After upload: hard refresh. Optional: re-upload doctor images once in dashboard
+(hero + about) so saved files are transparent PNGs permanently.
